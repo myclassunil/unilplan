@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+   <head>
+      <title>UniPlan</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <link href="{{ url_for('static', filename='Uniplan_scheduler/css/style2.css') }}" rel="stylesheet">
+      <link href="{{ url_for('static', filename='Uniplan_scheduler/css/animate.css') }}" rel="stylesheet">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+      <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+
+      <script>
+         $(document).ready(function(){
+           // Add smooth scrolling to all links in navbar + footer link
+           $(".navbar a, footer a[href='#myPage']").on('click', function(event) {
+
+            // Make sure this.hash has a value before overriding default behavior
+           if (this.hash !== "") {
+
+             // Prevent default anchor click behavior
+             event.preventDefault();
+
+             // Store hash
+             var hash = this.hash;
+
+             // Using jQuery's animate() method to add smooth page scroll
+             // The optional number (900) specifies the number of milliseconds it takes to scroll to the specified area
+             $('html, body').animate({
+               scrollTop: $(hash).offset().top
+             }, 900, function(){
+
+               // Add hash (#) to URL when done scrolling (default click behavior)
+               window.location.hash = hash;
+               });
+             } // End if
+           });
+         })
+
+      </script>
+
+       <script src="{{ url_for('static', filename='Uniplan_scheduler/js/wow.min.js') }}"></script>
+       <script>
+          new WOW().init();
+       </script>
+       <script>
+           function check(browser) {
+               window.alert("test");
+           }
+       </script>
+       <script>
+           function check_year(value) {
+               if (value == "propédeutique"){
+                   document.getElementById("section_supp").style.display = "block";
+                   document.getElementById("list_supp").style.display = "block";
+               } else {
+                   document.getElementById("section_supp").style.display = "none";
+                   document.getElementById("list_supp").style.display = "none";
+               }
+           }
+        </script>
+
+
+   </head>
+   <body id="myPage" data-spy="scroll" data-target=".navbar" data-offset="60">
+       <nav class="navbar navbar-default navbar-fixed-top">
+           <div class="container">
+               <div class="navbar-header">
+                   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                       <span class="icon-bar"></span>
+                       <span class="icon-bar"></span>
+                       <span class="icon-bar"></span>
+                   </button>
+                   <a class="navbar-brand" href="#myPage">Accueil</a>
+               </div>
+               <div class="collapse navbar-collapse" id="myNavbar">
+                   <ul class="nav navbar-nav navbar-right">
+                       <li><a href="#schedule">Horaire</a></li>
+                       <li><a href="#problematic">Problématique</a></li>
+                       <li><a href="#solution">Solutions</a></li>
+                       <li><a href="#avis">Avis</a></li>
+                       <li><a href="#contact">Contact</a></li>
+                   </ul>
+               </div>
+           </div>
+       </nav>
+
+       <div class="jumbotron text-center">
+           <h1>UniPlan</h1>
+           <p>Votre utilitaire de création d'horaire dédié à la faculté des Lettres de l'Université de Lausanne</p>
+       </div>
+
+       <!-- Creation d'horaire-->
+       <div id="schedule" class="container-fluid text-center">
+           <div class="row">
+               <form method="post">
+                   {{ myform.hidden_tag() }}
+                   <div class="col-sm-4" data-wow-delay="0.4s" data-wow-duration="0.6s">
+                       <div class="panel panel-default text-center">
+                           <div class="panel-heading">
+                               <h1>Choisir l'année</h1>
+                           </div>
+                           <div class="panel-body form-body">
+                               {% for subfield in myform.year %}
+                                   {{ subfield (onclick="check_year(this.value)")}}
+                                   {{ subfield.label}}
+                                   <br>
+                               {% endfor %}
+                           </div>
+                       </div>
+                   </div>
+                   <div class="col-sm-4" data-wow-delay="0.4s" data-wow-duration="0.6s">
+                       <div class="panel panel-default text-center">
+                           <div class="panel-heading">
+                               <h1>Choisir le semestre</h1>
+                           </div>
+                           <div class="panel-body form-body">
+                               {% for subfield in myform.semester %}
+                                   {{ subfield }}
+                                   {{ subfield.label }}<br>
+                               {% endfor %}
+                           </div>
+                       </div>
+                   </div>
+                   <div class="col-sm-4" data-wow-delay="0.4s" data-wow-duration="0.6s">
+                       <div class="panel panel-default text-center">
+                           <div class="panel-heading">
+                               <h1>Branches</h1>
+                           </div>
+                           <div class="panel-body">
+                               {{ myform.section1.label }}<br>
+                               {{ myform.section1 }}<br>
+                               {{ myform.section2.label }}<br>
+                               {{ myform.section2 }}<br>
+                               <div id="section_supp" style="display: none">
+                                   {{ myform.section3.label }}<br>
+                                   {{ myform.section3 }}<br>
+                               </div>
+                           </div>
+                           <script>
+                               if (document.getElementById('year-0').checked) {
+                                   document.getElementById("section_supp").style.display = "block";
+                               }
+                           </script>
+                       </div>
+                   </div>
+                   <div class="submit-button form-button">
+                       {{ myform.submit }}
+                   </div>
+               </form>
+           </div>
+           <div class="row">
+               {% if valid_form %}
+                   <script>
+                       $(function(){
+                           location.hash = "#form_anchor"});
+                   </script>
+                   <a name="form_anchor" class="anchor"></a>
+                   {% if is_section1 or is_section2 or is_section3 %}
+                       <form method="post">
+                           {{ list_form.hidden_tag() }}
+                           <div class="col-sm-6 text-left">
+                               {% if is_section1 %}
+                                   <div class="panel panel-default">
+                                       <div class="panel-heading">
+                                           <h1 class="list-classes">{{ list_form.selection1.label }}</h1>
+                                       </div>
+                                       <div class="panel-body checkbox-inline list-classes">
+                                           {{ list_form.selection1 (class="list-classes")}}<br>
+                                       </div>
+                                   </div>
+                               {% endif %}
+                           </div>
+                           <div class="col-sm-6 text-left">
+                               {% if is_section2 %}
+                                   <div class="panel panel-default">
+                                       <div class="panel-heading">
+                                           <h1 class="list-classes">{{ list_form.selection2.label }}</h1>
+                                       </div>
+                                       <div class="panel-body list-classes checkbox-inline">
+                                           {{ list_form.selection2 }}<br>
+                                       </div>
+                                   </div>
+                               {% endif %}
+                           </div>
+                           <div class="col-sm-6 text-left" id="list-supp" style="display: none">
+                               {% if is_section3 %}
+                                   <div class="panel panel-default">
+                                       <div class="panel-heading">
+                                           <h1 class="list-classes">{{ list_form.selection3.label }}</h1>
+                                       </div>
+                                       <div class="panel-body list-classes checkbox-inline">
+                                           {{ list_form.selection3 }}<br>
+                                       </div>
+                                   </div>
+                               {% endif %}
+                               <script>
+                                   if (document.getElementById('year-0').checked) {
+                                       document.getElementById("list-supp").style.display = "block";
+                                   }
+                               </script>
+                           </div>
+                           <div class="submit-button">
+                               {% if is_section1 or is_section2 or is_section3 %}
+                                   {{ list_form.submit }}
+                               {% endif %}
+                           </div>
+                       </form>
+                   {% else %}
+                       <div class="col-sm-6 text-left" data-wow-delay="0.4s" data-wow-duration="0.6s">
+                           <div class="panel panel-default">
+                               <div class="panel-heading">
+                                   <h1 class="list-classes">Aucune branche sélectionnée</h1>
+                               </div>
+                               <div class="panel-body list-classes checkbox-inline">
+                                   <p>Vous pouvez sélectionner une branche dans le menu ci-dessus.</p>
+                               </div>
+                           </div>
+                       </div>
+                   {% endif %}
+               {% endif %}
+           </div>
+       </div>
+
+      <!-- A propos -->
+      <div id="problematic" class="container-fluid bg-grey">
+         <div class="row">
+            <div class="col-sm-10 wow fadeInLeft" align="justify">
+               <br>
+               <h2>PROBLÉMATIQUE</h2>
+               <h4>À l’université de Lausanne, les étudiants inscrits dans la faculté des Lettres sont amenés à
+                   composer leurs propres horaires de cours en fonction de leur cursus. Ces cours sont proposés par
+                   les sections elles-mêmes. Par exemple la section d’histoire de l’art propose les horaires de ses
+                   cours et la section de français également. Un problème récurrent est le chevauchement
+                   d’horaires/cours.  À savoir qu’un étudiant en année propédeutique appartient à trois sections.
+                   <strong>Le système en place ne permet pas</strong> une compilation personnalisée des horaires.
+                   Les cours sont <strong>tous</strong> insérés dans l'horaire en fonction du choix de la section,
+                   de l'année et du semestre.
+               </h4>
+               <br>
+               <br>
+            </div>
+            <div class="col-sm-2,5 wow fadeInRight">
+               <span class="glyphicon glyphicon-signal logo"></span>
+            </div>
+         </div>
+      </div>
+      <div id="solution" class="container-fluid">
+         <div class="row">
+            <div class="col-sm-2 wow fadeInLeft">
+               <span class="glyphicon glyphicon-calendar logo"></span>
+            </div>
+            <div class="col-sm-10 wow fadeInRight" align="justify">
+               <br>
+               <h2>SOLUTION</h2>
+               <h4><strong>Performance et simplicité:</strong> Pour remédier à ça, UniPlan veut proposer une approche
+                   plus <strong>personnelle</strong> de la compilation d’horaire. En proposant une liste dynamique des
+                   cours, qui peuvent être sélectionnés et ajoutés à un horaire personnalisé par <strong>l’étudiant
+                       lui même
+                   </strong>.
+               </h4>
+            </div>
+         </div>
+      </div>
+
+      <!-- carrousel-->
+      <div id="avis" class="container-fluid bg-grey text-center">
+          <h2>Ce que nos utilisateurs en disent</h2>
+          <div id="myCarousel" class="carousel slide text-center" data-ride="carousel">
+              <!-- Indicators -->
+              <ol class="carousel-indicators">
+                  <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                  <li data-target="#myCarousel" data-slide-to="1"></li>
+                  <li data-target="#myCarousel" data-slide-to="2"></li>
+              </ol>
+              <!-- Wrapper for slides -->
+              <div class="carousel-inner wow fadeInUpBig" role="listbox">
+                  <div class="item active">
+                      <h4>"Cet utilitaire a changé ma vie! "<br><span style="font-style:normal;">Rafael Bruni Baschino, Étudiant en Histoire de l'art</span></h4>
+                  </div>
+                  <div class="item">
+                      <h4>"Un seul mot... WOW!!"<br><span style="font-style:normal;">Cyrille Gay-Crosier, Étudiant en Anglais</span></h4>
+                  </div>
+                  <div class="item">
+                      <h4>"Je ne pourrais pas être plus satisfait de cette découverte"<br><span style="font-style:normal;">Robin Pitteloud, Étudiant en Histoire</span></h4>
+                  </div>
+                  <div class="item">
+                      <h4>"C'est tellement pratique ! "<br><span style="font-style:normal;">Basile Maillard, Étudiant en Informatique pour les sciences humaines</span></h4>
+                  </div>
+              </div>
+              <!-- Left and right controls -->
+              <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+                  <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                  <span class="sr-only">Previous</span>
+              </a>
+              <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+                  <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                  <span class="sr-only">Next</span>
+              </a>
+          </div>
+      </div>
+
+      <!--Contact-->
+      <div id="contact" class="container-fluid">
+          <div class="row">
+              <div class="col-sm-7 text-start wow bounceInLeft">
+                  <p><span class="glyphicon glyphicon-map-marker"></span> Université de Lausanne - Section des sciences du langage et de l'information</p>
+                  <p><span class="glyphicon glyphicon-phone"></span> 021 692 29 10</p>
+                  <p><span class="glyphicon glyphicon-envelope"></span> Secretariat-sli@unil.ch</p>
+              </div>
+          </div>
+          <footer class="container-fluid text-center">
+              <a href="#myPage" title="To Top">
+                  <span class="glyphicon glyphicon-chevron-up"></span>
+              </a>
+              <p style="line-height:0.3px;color:#288599">Copyright UniPlan</p>
+              <p style="color:#288599;">Projet proposé dans le cadre du Bachelor ISH</p>
+              <p style="line-height:0.3px;color:#288599">Cours: "Développement de projet"</p>
+              <p style="color:#288599;">Sous la direction de M. Davide Picca</p>
+          </footer>
+   </body>
+</html>

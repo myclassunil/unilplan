@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>UnilPlan</title>
+
+    <link rel='stylesheet' type='text/css' href='../static/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
+    <link rel='stylesheet' type='text/css' href='../static/jquery.weekcalendar.css' />
+
+    <style type='text/css'>
+        body {
+            font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+            margin: 0;
+        }
+
+        h1 {
+            margin: 0 0 1em;
+            padding: 0.5em;
+        }
+
+  p.description {
+    font-size: 0.8em;
+    padding: 1em;
+    position: absolute;
+    top: 3.2em;
+    margin-right: 400px;
+  }
+
+  #message {
+    font-size: 0.7em;
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    width: 350px;
+    display: none;
+    padding: 1em;
+    background: #ffc;
+    border: 1px solid #dda;
+  }
+  </style>
+
+  <script type='text/javascript' src='../static/libs/jquery-1.4.4.min.js'></script>
+  <script type='text/javascript' src='../static/libs/jquery-ui-1.8.11.custom.min.js'></script>
+
+  <script type="text/javascript" src="../static/libs/date.js"></script>
+  <script type='text/javascript' src='../static/jquery.weekcalendar.js'></script>
+  <script type='text/javascript'>
+      var year = 2018;
+      var month = 0;
+      var day = 1;
+      var list_classes = [];
+
+      function classes_to_events(list_classes) {
+          var list_classes_calendar = [];
+          var nbr_section = 0;
+          var list_sections = [];
+
+          for (var i=0; i < list_classes.length; i++){
+              var class_dict = [];
+              console.log(list_sections.indexOf(list_classes[i]['Section']));
+
+              if (list_sections.indexOf(list_classes[i]['Section']) === -1){
+                  nbr_section++;
+                  list_sections.push(list_classes[i]['Section']);
+                  console.log(nbr_section);
+                  console.log(list_sections);
+              }
+
+              class_dict['id'] = i+1;
+              class_dict['start'] = new Date(year, month, list_classes[i]['day_idx'], list_classes[i]['HourStart'], list_classes[i]['MinuteStart']);
+              class_dict['end'] = new Date(year, month, list_classes[i]['day_idx'], list_classes[i]['HourEnd'], list_classes[i]['MinuteEnd']);
+              class_dict['title'] =
+                  "<div class='section-"+nbr_section+"'>" +
+                    "<span class='classes-name'>" + list_classes[i]['Name'] + "</span><br>" +
+                    list_classes[i]['Teacher'] +
+                    "<br><span class='classes-location'>" + list_classes[i]['Location'] + "</span>" +
+                  "</div>";
+              list_classes[i]['section_idx'] = nbr_section;
+              class_dict['data'] = list_classes[i];
+              list_classes_calendar.push(class_dict);
+
+          }
+          return list_classes_calendar
+      }
+
+      var list_classes = classes_to_events({{ list_classes|safe }});
+      console.log(list_classes)
+
+      var eventData = {
+          events : list_classes
+      };
+
+      $(document).ready(function() {
+        $('#calendar').weekCalendar({
+          hourLine: false,
+          data: eventData,
+          height: function($calendar) {
+            return $(window).height() - $('h1').outerHeight(true);
+          },
+          eventRender : function(calEvent, $event) {
+            if (calEvent.end.getTime() < new Date().getTime()) {
+              $event.css('backgroundColor', '#dddde3');
+              $event.find('.time').css({'backgroundColor': '#999', 'border':'1px solid #888'});
+            }
+          },
+          eventNew: function(calEvent, $event) {
+            displayMessage('<strong>Added event</strong><br/>Start: ' + calEvent.start + '<br/>End: ' + calEvent.end);
+            alert('You\'ve added a new event. You would capture this event, add the logic for creating a new event with your own fields, data and whatever backend persistence you require.');
+          },
+          eventDrop: function(calEvent, $event) {
+            displayMessage('<strong>Moved Event</strong><br/>Start: ' + calEvent.start + '<br/>End: ' + calEvent.end);
+          },
+          eventResize: function(calEvent, $event) {
+            displayMessage('<strong>Resized Event</strong><br/>Start: ' + calEvent.start + '<br/>End: ' + calEvent.end);
+          },
+          eventClick: function(calEvent, $event) {
+              var popup = document.getElementById('class-popup');
+              var span = document.getElementsByClassName("close")[0];
+              var class_time = document.getElementById("popup-time");
+              var class_name = document.getElementById("popup-name");
+              var class_section = document.getElementById("popup-section");
+              var class_teacher = document.getElementById("popup-teacher");
+              var class_location = document.getElementById("popup-location");
+              var classe = calEvent.data;
+
+              popup.style.display = "block";
+              class_time.innerHTML = classe.Day + " - " + classe.TimeStart + "-" + classe.TimeEnd;
+              class_name.innerHTML = classe.Name;
+              class_section.innerHTML = classe.Section;
+              class_teacher.innerHTML = classe.Teacher;
+              class_location.innerHTML = classe.Location;
+
+              if (classe.section_idx === 1){
+                  $(".popup-content").css({"background-color":"#C6F8FF", "border":"15px solid #577F92"});
+              } else if (classe.section_idx === 2){
+                  $(".popup-content").css({"background-color":"#FFEACD", "border":"15px solid #F1962E"});
+              } else if (classe.section_idx === 3){
+                  $(".popup-content").css({"background-color":"#BAFFC9", "border":"15px solid #005247"});
+              }
+
+              span.onclick = function() {
+                  popup.style.display = "none";
+              }
+              window.onclick = function(event) {
+                  if (event.target == popup) {
+                      popup.style.display = "none";
+                  }
+              }
+          },
+          noEvents: function() {
+              displayMessage('There are no events for this week');
+          }
+        });
+
+        function displayMessage(message) {
+          $('#message').html(message).fadeIn();
+        }
+
+        $('<div id="message" class="ui-corner-all"></div>').prependTo($('body'));
+      });
+
+      $(document).ready(function(){
+            $(".section-1").parent().parent().css({"background-color":"#C6F8FF"});
+            $(".section-1").parent().siblings(".wc-time").css({"background-color":"#577F92", "border-color":"#577F92"});
+            $(".section-2").parent().parent().css({"background-color":"#FFEACD"});
+            $(".section-2").parent().siblings(".wc-time").css({"background-color":"#F1962E", "border-color":"#F1962E"});
+            $(".section-3").parent().parent().css({"background-color":"#BAFFC9"});
+            $(".section-3").parent().siblings(".wc-time").css({"background-color":"#005247", "border-color":"#005247"});
+        });
+
+    </script>
+</head>
+<body>
+
+  <div id='calendar'></div>
+  <a href="/" class="return-button" role="button">Retour sur la page d'accueil</a>
+  <div id="class-popup" class="popup">
+      <!-- Modal content -->
+      <div class="popup-content">
+          <span class="close">&times;</span>
+          <p id="popup-time"></p>
+          <p id="popup-section"></p>
+          <p id="popup-name"></p>
+          <p id="popup-teacher"></p>
+          <p id="popup-location"></p>
+      </div>
+  </div>
+
+
+</body>
+</html>
